@@ -130,6 +130,51 @@ const CONFIG = {
           }
         }
       ]
+    },
+    {
+      name: "Big Tech",
+      sites: [
+        {
+          name: "Meta Careers",
+          urls: {
+            keyword: "https://www.metacareers.com/jobs?q={keyword}",
+            location: "https://www.metacareers.com/jobs?q={keyword}&offices[0]={city}%2C%20{state}",
+            remote: "https://www.metacareers.com/jobs?q={keyword}&offices[0]=Remote%2C%20US"
+          }
+        },
+        {
+          name: "Apple Jobs",
+          urls: {
+            keyword: "https://jobs.apple.com/en-us/search?search={keyword}",
+            location: null,
+            remote: "https://jobs.apple.com/en-us/search?search={keyword}&sort=relevance&homeOffice=true"
+          }
+        },
+        {
+          name: "Amazon Jobs",
+          urls: {
+            keyword: "https://www.amazon.jobs/en/search?base_query={keyword}",
+            location: "https://www.amazon.jobs/en/search?base_query={keyword}&loc_query={city}%2C%20{state}",
+            remote: "https://www.amazon.jobs/en/search?base_query={keyword}&loc_query=Remote&virtual-locations=true"
+          }
+        },
+        {
+          name: "Netflix Jobs",
+          urls: {
+            keyword: "https://jobs.netflix.com/search?q={keyword}",
+            location: "https://jobs.netflix.com/search?q={keyword}&location={city}%2C%20{state}",
+            remote: "https://jobs.netflix.com/search?q={keyword}&location=Remote&Work+Type=remote"
+          }
+        },
+        {
+          name: "Google Careers",
+          urls: {
+            keyword: "https://www.google.com/about/careers/applications/jobs/results?q={keyword}",
+            location: "https://www.google.com/about/careers/applications/jobs/results?q={keyword}&location={city}%2C%20{state}",
+            remote: "https://www.google.com/about/careers/applications/jobs/results?q={keyword}&has_remote=true"
+          }
+        }
+      ]
     }
   ]
 };
