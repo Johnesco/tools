@@ -743,7 +743,7 @@
     .site-link.location:hover { background: #40916c; }
     .site-link.remote:hover { background: #9d4edd; }
 
-    .site-link.location.disabled {
+    .site-link.disabled {
       opacity: 0.15;
       cursor: default;
       pointer-events: none;
@@ -829,6 +829,76 @@
     .search-card.core { border-left: 3px solid #00d9ff; }
     .search-card.growth { border-left: 3px solid #4ade80; }
     .search-card.reach { border-left: 3px solid #c084fc; }
+
+    /* Intro Section */
+    .intro-section {
+      max-width: 900px;
+      margin: 0 auto 1.5rem;
+      background: #16213e;
+      border: 1px solid #1f4068;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .intro-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      user-select: none;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    .intro-header:hover { color: #aaa; }
+
+    .intro-header .collapse-arrow {
+      font-size: 0.85rem;
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+
+    .intro-section.collapsed .collapse-arrow { transform: rotate(-90deg); }
+
+    .intro-content {
+      padding: 0 1rem 1rem;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    .intro-section.collapsed .intro-content {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .intro-content ol {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 0.85rem;
+      color: #bbb;
+    }
+
+    .intro-content li {
+      margin-bottom: 0.4rem;
+    }
+
+    .intro-content li strong {
+      color: #eee;
+    }
+
+    .intro-content .color-legend {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin: 0 2px;
+    }
 
     /* In-card skill groups (board view) */
     .card-skill-group { margin-top: 0.4rem; }
@@ -932,6 +1002,22 @@
     </div>
   </header>
 
+  <div class="intro-section" id="intro-section">
+    <div class="intro-header" onclick="toggleGroup('intro', this)">
+      <span class="collapse-arrow">▾</span> How to Use JobFinder
+    </div>
+    <div class="intro-content">
+      <ol>
+        <li><strong>Add search terms</strong> — type job titles in the box above (comma or newline-separated) and pick an optional priority tier, then click Add.</li>
+        <li><strong>Set your location</strong> — enter a city and state to unlock location-based search links alongside remote ones.</li>
+        <li><strong>Click links to search</strong> — each board shows a <strong>Location</strong> and <strong>Remote</strong> link that opens in a new tab.</li>
+        <li><strong>Track your progress</strong> — links you clicked today show a green <span style="color:#4ade80">&#10003;</span> checkmark; links older than 3 days turn <span style="color:#f59e0b">amber</span> so you know what's stale.</li>
+        <li><strong>Organize with priorities</strong> — assign <span class="color-legend" style="background:#00d9ff"></span>&nbsp;Core, <span class="color-legend" style="background:#4ade80"></span>&nbsp;Growth, or <span class="color-legend" style="background:#c084fc"></span>&nbsp;Reach to group and color-code your searches.</li>
+        <li><strong>Customize boards &amp; views</strong> — toggle boards on/off, add your own custom career pages, and switch between <em>By Skill</em> and <em>By Board</em> views.</li>
+      </ol>
+    </div>
+  </div>
+
   <div class="edit-panel" id="searches-panel"></div>
   <div class="edit-panel" id="boards-panel"></div>
 
@@ -981,6 +1067,11 @@
       loadCollapsed();
       loadViewMode();
 
+      // Apply intro collapsed state
+      if (collapsedGroups['intro']) {
+        document.getElementById('intro-section').classList.add('collapsed');
+      }
+
       // Enter to submit textarea, Shift+Enter for newline
       document.getElementById('search-input').addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -1014,7 +1105,12 @@
             return s;
           });
         } else {
-          searches = [];
+          searches = [
+            { term: 'Manager', priority: '' },
+            { term: 'Developer', priority: '' },
+            { term: 'Poet', priority: '' }
+          ];
+          saveSearches();
         }
       } catch (e) {
         searches = [];
@@ -1098,7 +1194,7 @@
       collapsedGroups[key] = !collapsedGroups[key];
       saveCollapsed();
       // Toggle directly on DOM — no full re-render
-      const group = el ? el.closest('.priority-group, .card-skill-group') : null;
+      const group = el ? el.closest('.priority-group, .card-skill-group, .intro-section') : null;
       if (group) {
         group.classList.toggle('collapsed', collapsedGroups[key]);
       } else {
@@ -1824,6 +1920,20 @@
         html += `<div class="no-location-note">Only remote search available — add a location above for location-based results</div>`;
       }
 
+      const enabledCustom = customSites.filter(s => enabledSites.includes(s.name));
+      if (enabledCustom.length > 0) {
+        const isCollapsed = collapsedGroups['Custom'];
+        html += `<div class="priority-group${isCollapsed ? ' collapsed' : ''}">`;
+        html += `<h2 class="priority-header" onclick="toggleGroup('Custom', this)">
+          <span class="collapse-arrow">▾</span> Custom <span class="group-count">(${enabledCustom.length})</span>
+        </h2>`;
+        html += `<div class="searches-grid">`;
+        enabledCustom.forEach(site => {
+          html += buildBoardCard(site, hasLoc);
+        });
+        html += '</div></div>';
+      }
+
       CONFIG.categories.forEach(cat => {
         const enabledInCategory = cat.sites.filter(s => enabledSites.includes(s.name));
         if (enabledInCategory.length === 0) return;
@@ -1839,20 +1949,6 @@
         });
         html += '</div></div>';
       });
-
-      const enabledCustom = customSites.filter(s => enabledSites.includes(s.name));
-      if (enabledCustom.length > 0) {
-        const isCollapsed = collapsedGroups['Custom'];
-        html += `<div class="priority-group${isCollapsed ? ' collapsed' : ''}">`;
-        html += `<h2 class="priority-header" onclick="toggleGroup('Custom', this)">
-          <span class="collapse-arrow">▾</span> Custom <span class="group-count">(${enabledCustom.length})</span>
-        </h2>`;
-        html += `<div class="searches-grid">`;
-        enabledCustom.forEach(site => {
-          html += buildBoardCard(site, hasLoc);
-        });
-        html += '</div></div>';
-      }
 
       return html;
     }
@@ -1905,18 +2001,18 @@
             <span class="site-name${priority ? ' ' + priority : ''}">${safeTerm}</span>
             <div class="site-links">`;
 
-          if (site.urls.location) {
-            if (hasLocation) {
+          if (site.urls.location && hasLocation) {
               const locationUrl = buildUrl(site.urls.location, term, userLocation.city, userLocation.state);
               html += `<a href="${locationUrl}" target="_blank" class="site-link location" data-keyword="${safeAttr}" data-site="${safeSiteAttr}">Location</a>`;
-            } else {
+          } else {
               html += `<span class="site-link location disabled">Location</span>`;
-            }
           }
 
           if (site.urls.remote) {
             const remoteUrl = buildUrl(site.urls.remote, term, '', '');
             html += `<a href="${remoteUrl}" target="_blank" class="site-link remote" data-keyword="${safeAttr}" data-site="${safeSiteAttr}">Remote</a>`;
+          } else {
+            html += `<span class="site-link remote disabled">Remote</span>`;
           }
 
           html += `</div>${statusHtml}</div>`;
@@ -1947,6 +2043,42 @@
           </div>
       `;
 
+      // Custom sites first
+      const enabledCustom = customSites.filter(s => enabledSites.includes(s.name));
+      if (enabledCustom.length > 0) {
+        html += `<div class="link-category">
+          <div class="link-category-name">Custom</div>`;
+
+        enabledCustom.forEach(site => {
+          const age = getClickAge(term, site.name);
+          const statusHtml = age
+            ? `<span class="site-status ${age.tier}">${age.tier === 'fresh' ? '✓ ' : ''}${age.label}</span>`
+            : '';
+
+          html += `<div class="site-row">
+            <span class="site-name">${escapeHtml(site.name)}</span>
+            <div class="site-links">`;
+
+          if (site.urls.location && hasLocation) {
+              const locationUrl = buildUrl(site.urls.location, term, userLocation.city, userLocation.state);
+              html += `<a href="${locationUrl}" target="_blank" class="site-link location" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Location</a>`;
+          } else {
+              html += `<span class="site-link location disabled">Location</span>`;
+          }
+
+          if (site.urls.remote) {
+            const remoteUrl = buildUrl(site.urls.remote, term, '', '');
+            html += `<a href="${remoteUrl}" target="_blank" class="site-link remote" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Remote</a>`;
+          } else {
+            html += `<span class="site-link remote disabled">Remote</span>`;
+          }
+
+          html += `</div>${statusHtml}</div>`;
+        });
+
+        html += '</div>';
+      }
+
       CONFIG.categories.forEach(cat => {
         const enabledInCategory = cat.sites.filter(s => enabledSites.includes(s.name));
         if (enabledInCategory.length === 0) return;
@@ -1964,18 +2096,18 @@
             <span class="site-name">${site.name}</span>
             <div class="site-links">`;
 
-          if (site.urls.location) {
-            if (hasLocation) {
+          if (site.urls.location && hasLocation) {
               const locationUrl = buildUrl(site.urls.location, term, userLocation.city, userLocation.state);
               html += `<a href="${locationUrl}" target="_blank" class="site-link location" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Location</a>`;
-            } else {
+          } else {
               html += `<span class="site-link location disabled">Location</span>`;
-            }
           }
 
           if (site.urls.remote) {
             const remoteUrl = buildUrl(site.urls.remote, term, '', '');
             html += `<a href="${remoteUrl}" target="_blank" class="site-link remote" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Remote</a>`;
+          } else {
+            html += `<span class="site-link remote disabled">Remote</span>`;
           }
 
           html += `</div>${statusHtml}</div>`;
@@ -1983,42 +2115,6 @@
 
         html += '</div>';
       });
-
-      // Custom sites
-      const enabledCustom = customSites.filter(s => enabledSites.includes(s.name));
-      if (enabledCustom.length > 0) {
-        html += `<div class="link-category">
-          <div class="link-category-name">Custom</div>`;
-
-        enabledCustom.forEach(site => {
-          const age = getClickAge(term, site.name);
-          const statusHtml = age
-            ? `<span class="site-status ${age.tier}">${age.tier === 'fresh' ? '✓ ' : ''}${age.label}</span>`
-            : '';
-
-          html += `<div class="site-row">
-            <span class="site-name">${escapeHtml(site.name)}</span>
-            <div class="site-links">`;
-
-          if (site.urls.location) {
-            if (hasLocation) {
-              const locationUrl = buildUrl(site.urls.location, term, userLocation.city, userLocation.state);
-              html += `<a href="${locationUrl}" target="_blank" class="site-link location" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Location</a>`;
-            } else {
-              html += `<span class="site-link location disabled">Location</span>`;
-            }
-          }
-
-          if (site.urls.remote) {
-            const remoteUrl = buildUrl(site.urls.remote, term, '', '');
-            html += `<a href="${remoteUrl}" target="_blank" class="site-link remote" data-keyword="${safeAttr}" data-site="${escapeAttr(site.name)}">Remote</a>`;
-          }
-
-          html += `</div>${statusHtml}</div>`;
-        });
-
-        html += '</div>';
-      }
 
       html += '</div>';
 
