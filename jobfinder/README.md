@@ -1,59 +1,28 @@
 # JobFinder
 
-A simple HTML page to browse job search links across multiple sites and keywords.
+Type your job titles once. Get one-click search links across 10 job boards, each opening in a new tab, with a note of when you last ran each search — green check for today, amber when it's gone stale.
 
-## Usage
+**Live:** https://johnesco.github.io/tools/jobfinder/
 
-1. Open `index.html` in your browser
-2. Select an industry from the dropdown
-3. Click individual links or "Open All" to batch-open
+## Privacy
 
-That's it. No install, no build, no dependencies.
+Everything is saved only in your browser (localStorage). No server, no account, no analytics, no tracking. JobFinder never fetches or scrapes anything — the links just open each board's own search page.
 
-## Customization
+## Boards
 
-Edit `config.js` to change sites and keywords:
+LinkedIn, Indeed (covers Glassdoor), ZipRecruiter, Monster (covers CareerBuilder), SimplyHired, Dice, Built In, RemoteOK, Himalayas, Jobicy.
 
-```javascript
-const CONFIG = {
-  sites: [
-    { name: "LinkedIn", url: "https://www.linkedin.com/jobs/search/?keywords={keyword}" },
-    { name: "Indeed", url: "https://www.indeed.com/jobs?q={keyword}" },
-    // Add more sites...
-  ],
+Each board row has a **Location** link (uses your city/state) and a **Remote** link. The last three boards are remote-only.
 
-  industries: {
-    "gaming": [
-      "Game QA Lead",
-      "Game Test Manager",
-      // Add more keywords...
-    ],
-    // Add more industries...
-  }
-};
-```
-
-**Sites:** Each site needs a `name` and `url` with `{keyword}` placeholder.
-
-**Industries:** Group keywords by industry/category. The industry name becomes the dropdown option.
-
-After editing, just refresh the page.
+One button flips the grouping — cards per job title or cards per job board — and the rows animate to their new spots so you can follow the rearrangement.
 
 ## Files
 
 ```
-index.html   # The app - open this
-config.js    # Your sites and keywords - edit this
+index.html   # The app — all HTML, CSS, and JS
+config.js    # Board URL templates — edit to add or change boards
 ```
 
-## Current Industries
+No build, no dependencies. Edit, refresh, done.
 
-- software-qa (20 keywords)
-- business-product (5)
-- training-enablement (5)
-- accessibility (4)
-- ai-ml (4)
-- trust-safety (3)
-- manufacturing (3)
-- av-events (4)
-- gaming (6)
+Board templates use `{keyword}`, `{city}`, `{state}`, and `{keyword-dash}` ("QA Engineer" → "qa-engineer") placeholders. A board with `location: null` is remote-only.
