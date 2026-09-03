@@ -79,7 +79,7 @@
       box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
     }
 
-    .title-row input::placeholder { color: #5d6280; }
+    .title-row input::placeholder { color: #8a8fa8; }
 
     .title-row .remove {
       flex-shrink: 0;
@@ -88,7 +88,7 @@
       border: none;
       border-radius: 6px;
       background: transparent;
-      color: #5d6280;
+      color: #8a8fa8;
       font-size: 1.15rem;
       line-height: 1;
       cursor: pointer;
@@ -119,7 +119,7 @@
       box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
     }
 
-    .location-fields input::placeholder { color: #5d6280; }
+    .location-fields input::placeholder { color: #8a8fa8; }
 
     /* ===== Cards ===== */
     .cards {
@@ -238,6 +238,9 @@
       transition: border-color 0.2s, color 0.2s;
     }
 
+    /* The display rule above would otherwise override the hidden attribute */
+    #view-toggle[hidden] { display: none; }
+
     #view-toggle:hover,
     #view-toggle:focus-visible {
       border-color: #00d9ff;
@@ -269,11 +272,119 @@
       #view-toggle .swap-icon { transition: none; }
     }
 
+    /* ===== Instructions link + overlay ===== */
+    header .link-btn {
+      margin-top: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      color: #00d9ff;
+      font: inherit;
+      font-size: 0.9rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    header .link-btn:hover,
+    header .link-btn:focus-visible {
+      color: #fff;
+      background: rgba(0, 217, 255, 0.12);
+      outline: none;
+    }
+
+    #instructions {
+      width: min(560px, calc(100% - 2rem));
+      margin: auto;
+      padding: 0;
+      background: #16213e;
+      color: #eee;
+      border: 1px solid #1f4068;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    #instructions::backdrop {
+      background: rgba(8, 8, 24, 0.78);
+      backdrop-filter: blur(2px);
+    }
+
+    #instructions[open] { animation: fadeIn 0.2s ease; }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid #1f4068;
+    }
+
+    .modal-head h2 {
+      font-size: 1.15rem;
+      color: #00d9ff;
+    }
+
+    .modal-close {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #8a8fa8;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .modal-close:hover,
+    .modal-close:focus-visible {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    .modal-body {
+      padding: 1rem 1.25rem 1.25rem;
+      font-size: 0.92rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-body ol {
+      padding-left: 1.25rem;
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .modal-body li strong { color: #fff; }
+
+    .modal-body .site-link {
+      vertical-align: middle;
+      margin: 0 0.1rem;
+    }
+
+    .modal-body .demo-status {
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .modal-body .demo-status.fresh { color: #4ade80; }
+    .modal-body .demo-status.stale { color: #f59e0b; }
+
+    .modal-body .note {
+      margin-top: 1rem;
+      color: #8a8fa8;
+      font-size: 0.85rem;
+    }
+
     footer {
       text-align: center;
       margin-top: 2.5rem;
       font-size: 0.8rem;
-      color: #5d6280;
+      color: #8a8fa8;
     }
 
     footer p {
@@ -281,7 +392,7 @@
       margin: 0 auto 0.75rem;
     }
 
-    footer .tldr { color: #8a8fa8; }
+    footer .tldr { color: #b9bdd1; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
@@ -298,6 +409,7 @@
   <header>
     <h1>JobFinder</h1>
     <p class="tagline">Every job board. One page.</p>
+    <button type="button" class="link-btn" id="instructions-open">Instructions</button>
   </header>
 
   <section class="setup">
@@ -323,8 +435,26 @@
 
   <main class="cards" id="cards"></main>
 
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <div class="modal-head">
+      <h2 id="instructions-title">How to use JobFinder</h2>
+      <button type="button" class="modal-close" id="instructions-close" aria-label="Close instructions">&times;</button>
+    </div>
+    <div class="modal-body">
+      <ol>
+        <li><strong>Type a job title and press Enter.</strong> Add as many as you like. Paste a comma-separated list to add several at once.</li>
+        <li><strong>Add your city and state.</strong> Optional, but without both the <span class="site-link location disabled">Location</span> links stay greyed out. Remote links work either way.</li>
+        <li><strong>Click a link to search that board.</strong> Every title gets a card, every board gets a row. <span class="site-link location">Location</span> searches near you, <span class="site-link remote">Remote</span> searches remote-only. Each opens in a new tab.</li>
+        <li><strong>Watch the receipts.</strong> Each click gets stamped with the time, like <span class="demo-status fresh">&#10003; 9:15 AM</span>. Tomorrow it says 1d ago, and after three days it turns amber, <span class="demo-status stale">3d ago</span>, so you know what you've been skipping. The card header counts how many boards you've hit today.</li>
+        <li><strong>Flip the grouping</strong> with the button above the cards to see one card per board instead of one per title. Handy for "let me clear out LinkedIn."</li>
+        <li><strong>Edit anytime.</strong> Click a title to rename it, and its history comes along. Clear the text or hit &times; to remove it.</li>
+      </ol>
+      <p class="note">Everything lives in this browser only. No account, no sync, nothing leaves your machine. Clearing your browser's site data wipes the slate.</p>
+    </div>
+  </dialog>
+
   <footer>
-    <p>Listen up boaties! This app was made by John Escobedo. I pinky swear this connects to nothing but searches, it stores a bit in local web but I don't look-at, collect, see ANYTHING y'all put in there and I don't care and Lani can vouch for me even though she always says "John, that f*cker owes me a pizza". It's SAFE ok. All it does is help you make search queries and track how long ago you searched for it and where.</p>
+    <p>Made by John Escobedo. This page talks to exactly nobody. No server, no account, no analytics, no cookie banner begging for your soul. Your job titles and your city live in your own browser's storage and nowhere else. I couldn't peek at them if I wanted to, and honestly, I don't want to. All it does is build search links and remember when you last clicked them.</p>
     <p class="tldr">tl; dr<br>Everything stays in your browser, nothing is uploaded, no account, no tracking.</p>
   </footer>
 
@@ -365,6 +495,12 @@
           renderCards();
         }
       });
+
+      // Instructions overlay: native <dialog>; Escape closes it for free
+      const dlg = document.getElementById('instructions');
+      document.getElementById('instructions-open').addEventListener('click', () => dlg.showModal());
+      document.getElementById('instructions-close').addEventListener('click', () => dlg.close());
+      dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); }); // backdrop click
 
       const cityInput = document.getElementById('city-input');
       const stateInput = document.getElementById('state-input');
@@ -443,7 +579,8 @@
         const ampm = d.getHours() >= 12 ? 'PM' : 'AM';
         return { tier: 'fresh', label: '✓ ' + hour + ':' + min + ' ' + ampm };
       }
-      const days = Math.floor((Date.now() - ts) / 86400000);
+      // Calendar days, not elapsed hours: a click late yesterday is "1d ago"
+      const days = Math.max(1, Math.ceil((todayStart.getTime() - ts) / 86400000));
       return { tier: days <= 2 ? 'recent' : 'stale', label: days + 'd ago' };
     }
 
@@ -484,13 +621,21 @@
       remove.className = 'remove';
       remove.textContent = '×';
       remove.setAttribute('aria-label', 'Remove ' + term);
-      // mousedown (not click) so removing a row wins over the blur-commit race
-      remove.addEventListener('mousedown', e => {
-        e.preventDefault();
+      // mousedown (not click) so removing a row wins over the blur-commit race;
+      // click covers keyboard activation (Enter/Space), skipped if mousedown
+      // already removed this button from the DOM.
+      const removeTitle = () => {
         titles.splice(index, 1);
         saveTitles();
         renderTitlesForm();
         renderCards();
+      };
+      remove.addEventListener('mousedown', e => {
+        e.preventDefault();
+        removeTitle();
+      });
+      remove.addEventListener('click', () => {
+        if (remove.isConnected) removeTitle();
       });
       row.appendChild(remove);
 

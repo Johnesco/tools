@@ -10,7 +10,7 @@ JobFinder is a public single-page tool (vanilla HTML/JS/CSS, no build): the user
 
 Simplified 2026-08 by explicit owner decision. JobFinder **diverged from jobhelper** (C:\code\jobhelper, the private integrated pipeline tool) on that date and must stay:
 
-- **Dead simple.** No instructions section — the form must be self-explanatory. No settings panels, no view modes, no priority tiers, no import/export, no custom boards, no stats dashboard. Do not reintroduce these without the owner asking.
+- **Dead simple.** The form must be self-explanatory; the only help is the "Instructions" link under the tagline, which opens a native `<dialog>` overlay (added 2026-09-02 by owner request, never auto-opens). No settings panels, no view modes, no priority tiers, no import/export, no custom boards, no stats dashboard. Do not reintroduce these without the owner asking.
 - **localStorage-only.** No server, no accounts, no analytics, no external requests of any kind.
 - **Link-out only.** Opens board search pages in new tabs (`target="_blank" rel="noopener"`). Never fetches, scrapes, or embeds job data.
 - **No personal data in defaults.** First run starts empty.
