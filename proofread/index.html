@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentence Proofreader</title>
+    <title>One Sentence at a Time</title>
+    <meta name="description" content="Paste a draft and read it back one sentence at a time, so mistakes have nowhere to hide.">
     <style>
         * {
             margin: 0;
@@ -38,6 +39,16 @@
             text-align: center;
         }
         
+        .back {
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .back a {
+            color: white;
+        }
+
         h1 {
             font-size: 2.2rem;
             margin-bottom: 10px;
@@ -291,8 +302,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>Sentence Proofreader</h1>
-            <p class="description">Focus on one sentence at a time for better proofreading and editing</p>
+            <p class="back"><a href="../" target="_top">&larr; All tools</a></p>
+            <h1>One Sentence at a Time</h1>
+            <p class="description">Paste a draft and read it back one sentence at a time. Seeing each sentence alone makes typos, missing words and run-ons easier to catch. Your text never leaves this page.</p>
         </header>
         
         <div class="input-section">
@@ -383,6 +395,13 @@ Last line with punctuation.</textarea>
             // State variables
             let sentences = [];
             let currentIndex = 0;
+
+            // Intl.Segmenter knows about abbreviations, decimals and ellipses
+            const TITLE_END = /(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Rev|Hon|Gen|Col|Capt|Lt|Sgt|Gov|Sen|Rep)\.$/;
+            const segmenter = (window.Intl && Intl.Segmenter)
+                ? new Intl.Segmenter(undefined, { granularity: 'sentence' })
+                : null;
+
             
             // Update text statistics
             function updateStats() {
@@ -459,6 +478,10 @@ Last line with punctuation.</textarea>
             // Keyboard navigation
             document.addEventListener('keydown', function(e) {
                 if (viewerSection.classList.contains('hidden')) return;
+                // Let the arrow keys move the cursor while typing
+                const tag = e.target.tagName;
+                if (tag === 'TEXTAREA' || tag === 'INPUT' || e.target.isContentEditable) return;
+                if (e.altKey || e.ctrlKey || e.metaKey) return;
                 
                 if (e.key === 'ArrowLeft') {
                     prevBtn.click();
@@ -508,6 +531,21 @@ Last line with punctuation.</textarea>
             
             // Split a single line into sentences based on punctuation
             function splitLineIntoSentences(line) {
+                if (segmenter) {
+                    const parts = Array.from(segmenter.segment(line), s => s.segment.trim())
+                        .filter(s => s.length > 0);
+                    // Rejoin pieces that were cut after a title like "Mr." or "Dr."
+                    const joined = [];
+                    for (const part of parts) {
+                        const last = joined[joined.length - 1];
+                        if (last && (TITLE_END.test(last) || !/[\p{L}\p{N}]/u.test(part))) {
+                            joined[joined.length - 1] = last + ' ' + part;
+                        } else {
+                            joined.push(part);
+                        }
+                    }
+                    return joined;
+                }
                 const regex = /[^.!?]*[.!?]/g;
                 let matches = [];
                 let match;
